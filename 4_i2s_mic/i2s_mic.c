@@ -12,20 +12,21 @@ static const struct snd_soc_dapm_route i2s_mic_routes[] = {
     { "Microphone", NULL, "MICBIAS1" },
 };
 
-static int i2s_mic_startup(struct snd_pcm_substream *substream)
+static int i2s_mic_startup(struct snd_pcm_substream *substream, struct snd_soc_dai *dai)
 {
     // Enable the I2S microphone here
     return 0;
 }
 
 static int i2s_mic_hw_params(struct snd_pcm_substream *substream,
-                             struct snd_pcm_hw_params *params)
+                             struct snd_pcm_hw_params *params,
+			     struct snd_soc_dai *dai)
 {
     // Configure the I2S microphone hardware parameters here
     return 0;
 }
 
-static struct snd_soc_ops i2s_mic_ops = {
+static struct snd_soc_dai_ops i2s_mic_dai_ops = {
     .startup = i2s_mic_startup,
     .hw_params = i2s_mic_hw_params,
 };
@@ -33,15 +34,16 @@ static struct snd_soc_ops i2s_mic_ops = {
 static struct snd_soc_dai_driver i2s_mic_dai = {
     .name = "i2s-mic",
     .playback = {
-        .channels_min = 1,
-        .channels_max = 1,
-        .rates = SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000 |
-                 SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_44100 |
-                 SNDRV_PCM_RATE_48000,
-        .formats = SNDRV_PCM_FMTBIT_S16_LE,
+    .channels_min = 1,
+    .channels_max = 1,
+    .rates = SNDRV_PCM_RATE_8000 | SNDRV_PCM_RATE_16000 |
+              SNDRV_PCM_RATE_32000 | SNDRV_PCM_RATE_44100 |
+              SNDRV_PCM_RATE_48000,
+    .formats = SNDRV_PCM_FMTBIT_S16_LE,
     },
-    .ops = &i2s_mic_ops,
+    .ops = &i2s_mic_dai_ops,
 };
+
 
 static struct snd_soc_component_driver i2s_mic_component = {
     .dapm_widgets = i2s_mic_widgets,
@@ -82,7 +84,7 @@ static int i2s_mic_remove(struct platform_device *pdev)
 {
     struct snd_soc_card *card = dev_get_drvdata(&pdev->dev);
 
-    devm_snd_soc_unregister_card(&pdev->dev);
+    snd_soc_unregister_card(card);
 
     return 0;
 }
